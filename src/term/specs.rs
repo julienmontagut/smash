@@ -1,5 +1,4 @@
-use std::io::{stdout, Write};
-use super::colors::Color;
+use super::color::BasicColor;
 
 pub struct Size {
     pub width: u16,
@@ -30,7 +29,7 @@ pub fn kind() -> String {
 /// The color is a 3-tuple of RGB values.
 /// The string is truncated if it is too long to fit on the terminal.
 /// The string is not written if the position is outside the terminal.
-pub fn print_string(string: &str, position: (i8,i8), text_color: (i16,i16, i16)) {
+pub fn print_string(string: &str, position: (i8, i8), text_color: (i16, i16, i16)) {
     let size = size();
     let (x, y) = position;
     let (r, g, b) = text_color;
@@ -70,13 +69,13 @@ pub enum FontStyle {
 }
 
 pub struct Style {
-    pub fore_color: Color,
-    pub back_color: Color,
+    pub fore_color: BasicColor,
+    pub back_color: BasicColor,
     pub font_style: FontStyle,
 }
 
 impl Style {
-    pub fn new(fore_color: Color, back_color: Color, font_style: FontStyle) -> Style {
+    pub fn new(fore_color: BasicColor, back_color: BasicColor, font_style: FontStyle) -> Style {
         Style {
             fore_color,
             back_color,
@@ -94,27 +93,27 @@ pub fn escape_string_from_style(style: &Style) -> String {
     }
     output.push_str(";");
     match style.fore_color {
-        Color::None => output.push_str("39"),
-        Color::Black => output.push_str("30"),
-        Color::Red => output.push_str("31"),
-        Color::Green => output.push_str("32"),
-        Color::Yellow => output.push_str("33"),
-        Color::Blue => output.push_str("34"),
-        Color::Magenta => output.push_str("35"),
-        Color::Cyan => output.push_str("36"),
-        Color::White => output.push_str("37"),
+        BasicColor::Black => output.push_str("30"),
+        BasicColor::Red => output.push_str("31"),
+        BasicColor::Green => output.push_str("32"),
+        BasicColor::Yellow => output.push_str("33"),
+        BasicColor::Blue => output.push_str("34"),
+        BasicColor::Magenta => output.push_str("35"),
+        BasicColor::Cyan => output.push_str("36"),
+        BasicColor::White => output.push_str("37"),
+        BasicColor::Default => output.push_str("39"),
     }
     output.push_str(";");
     match style.back_color {
-        Color::None => output.push_str("49"),
-        Color::Black => output.push_str("40"),
-        Color::Red => output.push_str("41"),
-        Color::Green => output.push_str("42"),
-        Color::Yellow => output.push_str("43"),
-        Color::Blue => output.push_str("44"),
-        Color::Magenta => output.push_str("45"),
-        Color::Cyan => output.push_str("46"),
-        Color::White => output.push_str("47"),
+        BasicColor::Black => output.push_str("40"),
+        BasicColor::Red => output.push_str("41"),
+        BasicColor::Green => output.push_str("42"),
+        BasicColor::Yellow => output.push_str("43"),
+        BasicColor::Blue => output.push_str("44"),
+        BasicColor::Magenta => output.push_str("45"),
+        BasicColor::Cyan => output.push_str("46"),
+        BasicColor::White => output.push_str("47"),
+        BasicColor::Default => output.push_str("49"),
     }
     output.push_str("m");
     output
