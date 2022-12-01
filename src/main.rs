@@ -3,35 +3,29 @@ use std::{
     io::{stderr, stdin, stdout, Write},
     process::exit,
 };
-mod terminal;
+mod term;
 
-static APP_NAME: &str = env!("CARGO_PKG_NAME");
-static APP_VERSION: &str = env!("CARGO_PKG_VERSION");
+static LUSH_APP_NAME: &str = env!("CARGO_PKG_NAME");
+static LUSH_APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 
 fn main() {
-
-    let matches = Command::new(APP_NAME)
-        .version(APP_VERSION)
+    let matches = Command::new(LUSH_APP_NAME)
+        .version(LUSH_APP_VERSION)
         .about(env!("CARGO_PKG_DESCRIPTION"))
         .author(env!("CARGO_PKG_AUTHORS"))
         .disable_version_flag(true)
-        .args(&[
-            arg!(-v --version "Prints version information"),
-        ])
+        .args(&[arg!(-v --version "Prints version information")])
         .get_matches();
 
     if matches.get_flag("version") {
-        println!("{} {}", APP_NAME, APP_VERSION);
+        println!("{} {}", LUSH_APP_NAME, LUSH_APP_VERSION);
         exit(0);
     }
 
     let mut input = String::new();
 
     loop {
-
-        // println!("{}test{}", escape_string(Escape::Color(Color::Blue)), escape_string(Escape::Reset));
-
-        terminal::prompt::print_prompt();
+        term::prompt::print_prompt();
 
         if let Err(error) = stdin().read_line(&mut input) {
             writeln!(stderr(), "Error: {}", error).unwrap();
@@ -61,16 +55,12 @@ fn main() {
                     Err(e) => println!("{}", e),
                 }
             }
-            Some("help") => {
-                println!("exit - exits the shell");
-                println!("echo - echo arguments");
-            }
             Some("clear") => {
                 print!("\x1B[2J\x1B[1;1H");
             }
             Some("terminal") => {
-                let terminal_size = terminal::specs::size();
-                let terminal_kind = terminal::specs::kind();
+                let terminal_size = term::specs::size();
+                let terminal_kind = term::specs::kind();
 
                 println!(
                     "Terminal: {} size {}x{}",

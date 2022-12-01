@@ -1,6 +1,6 @@
 use std::io::{stdout, Write};
 use super::specs::{escape_string_from_style,FontStyle, Style};
-use super::colors::{Color};
+use super::color::{BasicColor};
 
 pub fn print_prompt() {
     let path = std::env::current_dir().unwrap();
@@ -10,8 +10,8 @@ pub fn print_prompt() {
         "~"
     );
 
-    let style_emphasis = Style::new(Color::Blue, Color::None, FontStyle::Bold);
-    let style_default = Style::new(Color::None, Color::None, FontStyle::Normal);
+    let style_emphasis = Style::new(BasicColor::Blue, BasicColor::Default, FontStyle::Bold);
+    let style_default = Style::new(BasicColor::Default, BasicColor::Default, FontStyle::Normal);
 
     println!("{}{}{}", escape_string_from_style(&style_emphasis), path, escape_string_from_style(&style_default));
     print!("> ");
