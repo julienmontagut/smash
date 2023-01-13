@@ -1,5 +1,5 @@
 [package]
-name = "lush"
+name = "kosh"
 version = "0.1.0"
 authors = ["Julien Montagut <_@julienmontagut.com>"]
 edition = "2021"
