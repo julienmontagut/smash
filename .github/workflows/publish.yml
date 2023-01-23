@@ -17,5 +17,5 @@ jobs:
         run: cargo build --release
       - name: Publish package
         env:
-          CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}
-        run: cargo publish --token $CRATES_TOKEN
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_IO_TOKEN }}
+        run: cargo publish
