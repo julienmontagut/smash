@@ -1,7 +1,4 @@
-use std::{
-    io::{stderr, stdin, stdout, Write},
-    process::exit,
-};
+use std::process::exit;
 
 use clap::{arg, Command};
 
