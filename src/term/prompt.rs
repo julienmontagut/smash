@@ -16,6 +16,6 @@ pub fn print_prompt() {
     println!("{}{}{}", escape_string_from_style(&style_emphasis), path, escape_string_from_style(&style_default));
     print!("> ");
     if let Err(err) = stdout().flush() {
-        panic!("lush: Failed to flush stdout: {}", err);
+        panic!("kosh: Failed to flush stdout: {}", err);
     }
 }
