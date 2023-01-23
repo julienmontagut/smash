@@ -7,15 +7,15 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug executable 'lush'",
+            "name": "Debug executable 'kosh'",
             "cargo": {
                 "args": [
                     "build",
-                    "--bin=lush",
-                    "--package=lush"
+                    "--bin=kosh",
+                    "--package=kosh"
                 ],
                 "filter": {
-                    "name": "lush",
+                    "name": "kosh",
                     "kind": "bin"
                 }
             },
@@ -25,16 +25,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in executable 'lush'",
+            "name": "Debug unit tests in executable 'kosh'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
-                    "--bin=lush",
-                    "--package=lush"
+                    "--bin=kosh",
+                    "--package=kosh"
                 ],
                 "filter": {
-                    "name": "lush",
+                    "name": "kosh",
                     "kind": "bin"
                 }
             },
