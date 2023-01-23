@@ -22,6 +22,5 @@ fn main() {
         exit(0);
     }
 
-    // kosh::run_loop(matches);
-    kosh::run_basic_loop();
+    kosh::run_loop(matches);
 }

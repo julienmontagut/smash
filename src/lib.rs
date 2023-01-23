@@ -5,7 +5,6 @@ use std::{
 
 use clap::ArgMatches;
 
-mod classic;
 mod term;
 
 struct Command<'a> {
