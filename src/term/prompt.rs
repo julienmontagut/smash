@@ -1,6 +1,6 @@
 use std::io::{stdout, Write};
-use super::specs::{escape_string_from_style,FontStyle, Style};
-use super::color::{BasicColor};
+use classic::term::specs::{escape_string_from_style,FontStyle, Style};
+use classic::term::color::{BasicColor};
 
 pub fn print_prompt() {
     let path = std::env::current_dir().unwrap();

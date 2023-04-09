@@ -48,8 +48,8 @@ pub fn run_loop(matches: ArgMatches) -> ! {
             Some(Command {
                 name: "terminal", ..
             }) => {
-                let terminal_size = term::specs::size();
-                let terminal_kind = term::specs::kind();
+                let terminal_size = classic::term::specs::size();
+                let terminal_kind = classic::term::specs::kind();
 
                 println!(
                     "Terminal: {} size {}x{}",
