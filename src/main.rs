@@ -1,6 +1,5 @@
-use std::process::exit;
-
 use clap::{arg, Command};
+use std::process::exit;
 
 static KOSH_APP_NAME: &str = env!("CARGO_PKG_NAME");
 static KOSH_APP_VERSION: &str = env!("CARGO_PKG_VERSION");
@@ -11,6 +10,7 @@ fn main() {
         .about(env!("CARGO_PKG_DESCRIPTION"))
         .author(env!("CARGO_PKG_AUTHORS"))
         .disable_version_flag(true)
+        .args(&[arg!(--posix "Run in a POSIX compatible mode")])
         .args(&[arg!(-v --version "Prints version information")])
         .get_matches();
 

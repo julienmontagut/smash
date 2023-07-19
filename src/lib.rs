@@ -1,9 +1,8 @@
+use clap::ArgMatches;
 use std::{
     io::{stderr, stdin, stdout, Write},
-    process::exit,
+    process::exit, error::Error,
 };
-
-use clap::ArgMatches;
 
 mod term;
 
@@ -13,6 +12,10 @@ struct Command<'a> {
 }
 
 pub fn run_loop(matches: ArgMatches) -> ! {
+
+    if matches.get_flag("posix") {
+        init_posix().unwrap();
+    }
 
     let mut input = String::new();
 
@@ -41,6 +44,10 @@ pub fn run_loop(matches: ArgMatches) -> ! {
                     Ok(_) => (),
                     Err(e) => println!("{}", e),
                 }
+            }
+            Some(Command { name: "pwd", .. }) => {
+                let current_dir = std::env::current_dir().unwrap();
+                println!("{}", current_dir.display());
             }
             Some(Command { name: "clear", .. }) => {
                 print!("\x1B[2J\x1B[1;1H");
@@ -72,6 +79,10 @@ pub fn run_loop(matches: ArgMatches) -> ! {
 
         input.clear();
     }
+}
+
+fn init_posix() -> Result<(), Box<dyn Error>> {
+    todo!()
 }
 
 fn read_line(input: &mut String) -> Option<Command> {
