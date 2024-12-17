@@ -1,21 +1,41 @@
-use std::io::{stdout, Write};
-use classic::term::specs::{escape_string_from_style,FontStyle, Style};
-use classic::term::color::{BasicColor};
+use crossterm::{
+    style::{self, Attribute, Color, Stylize},
+    QueueableCommand,
+};
+use std::env;
+use std::io::{self, stdout, Write};
 
-pub fn print_prompt() {
-    let path = std::env::current_dir().unwrap();
-    let path = path.to_str().unwrap();
-    let path = path.replace(
-        std::env::var("HOME").unwrap().as_str(),
-        "~"
-    );
+pub fn print_prompt() -> io::Result<()> {
+    let current_dir = env::current_dir()?;
+    let home_dir = env::var("HOME").unwrap_or_default();
 
-    let style_emphasis = Style::new(BasicColor::Blue, BasicColor::Default, FontStyle::Bold);
-    let style_default = Style::new(BasicColor::Default, BasicColor::Default, FontStyle::Normal);
+    let relative_path = if current_dir.starts_with(&home_dir) {
+        current_dir
+            .strip_prefix(&home_dir)
+            .map(|p| format!("~{}", p.display()))
+            .unwrap_or(current_dir.display().to_string())
+    } else {
+        current_dir.display().to_string()
+    };
 
-    println!("{}{}{}", escape_string_from_style(&style_emphasis), path, escape_string_from_style(&style_default));
-    print!("> ");
-    if let Err(err) = stdout().flush() {
-        panic!("kosh: Failed to flush stdout: {}", err);
+    let mut output = stdout();
+    let styled = Stylize::new(relative_path)
+        .with(Color::Blue)
+        .attribute(Attribute::Bold);
+    output
+        .queue(style::PrintStyledContent(styled))?
+        .queue(style::Print(" > "))?
+        .flush()?;
+    Ok(())
+}
+
+fn get_current_dir_string() -> io::Result<String> {
+    let path = env::current_dir()?;
+    match path.to_str() {
+        Some(p) => Ok(p.to_string()),
+        None => Err(io::Error::new(
+            io::ErrorKind::Other,
+            "Failed to convert path to string",
+        )),
     }
 }

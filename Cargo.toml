@@ -1,23 +1,27 @@
 [package]
-name = "kosh"
-version = "0.1.2"
-authors = ["Julien Montagut <_@julienmontagut.com>"]
-edition = "2021"
-license = "MIT"
+authors.workspace = true
 description = "An opinionated shell with a focus on simplicity and performance"
+documentation = "https://docs.rs/kosh"
+edition.workspace = true
+license = "MIT"
+name = "kosh"
 readme = "README.md"
+version = "0.1.2"
 
 # See more keys and their definitions at
 # https://doc.rust-lang.org/cargo/reference/manifest.html
+[features]
+default = ["paste"]
+paste = []
 
 [dependencies]
 clap = "4.0.26"
-classic = { path = "lib/classic" }
+classic   = { path = "lib/classic" }
+crossterm = { version = "0.27.0", features = ["events"] }
 
-[workspace]
-members = [
-    "lib/classic"
-]
+# [workspace]
+# members = ["lib/classic"]
 
 [workspace.package]
 authors = ["Julien Montagut <_@julienmontagut.com>"]
+edition = "2021"

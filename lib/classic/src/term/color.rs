@@ -1,4 +1,3 @@
-
 pub enum BasicColor {
     Black,
     Red,

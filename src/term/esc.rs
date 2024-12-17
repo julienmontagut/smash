@@ -1,5 +1,7 @@
 use std::fmt;
 
+use crossterm::terminal;
+
 pub const ESC_BEGIN: &str = "\x1b[";
 pub const ESC_END: &str = "m";
 

@@ -25,12 +25,9 @@ impl BuiltinCommand {
 }
 
 pub fn builtin_command(name: &str) -> Option<&'static BuiltinCommand> {
-    for command in BUILTINS {
-        if command.name == name {
-            return Some(command);
-        }
+    if name == "clear" {
+        BuiltinCommand::new("clear", clear);
     }
-
     None
 }
 
@@ -56,6 +53,10 @@ impl Command {
     }
 }
 
+fn external_execute(command: String, args: &[String]) -> Result<(), String> {
+    todo!()
+}
+
 pub enum BuiltinCommandDefinitions {
     // BuiltinCommand("clear", clear),
 }
@@ -71,7 +72,7 @@ pub fn clear(args: &[String]) -> Result<(), String> {
 
 pub fn execute_builtin(command: &str, args: &mut dyn Iterator<Item = &str>) {
     match command {
-        Some("history") => {
+        "history" => {
             // Reads history File
             let home = std::env::var("HOME").unwrap();
             // Searches for the history file in the home folder
@@ -79,39 +80,39 @@ pub fn execute_builtin(command: &str, args: &mut dyn Iterator<Item = &str>) {
             let history = std::fs::read_to_string(history_file).unwrap();
             println!("{}", history);
         }
-        Some("cd") => {
+        "cd" => {
             let path = args.next().unwrap_or("");
             std::env::set_current_dir(path).unwrap();
         }
-        Some("remove") => {
+        "remove" => {
             let path = args.next().unwrap_or("");
             std::fs::remove_file(path).unwrap();
         }
-        Some("create-dir") => {
+        "create-ir" => {
             let path = args.next().unwrap_or("");
             std::fs::create_dir(path).unwrap();
         }
-        Some("remove-dir") => {
+        "remove-ir" => {
             let path = args.next().unwrap_or("");
             std::fs::remove_dir(path).unwrap();
         }
-        Some("create") => {
+        "create" => {
             let path = args.next().unwrap_or("");
             std::fs::File::create(path).unwrap();
         }
-        Some("move") => {
+        "move" => {
             let from = args.next().unwrap_or("");
             let to = args.next().unwrap_or("");
 
             std::fs::rename(from, to).unwrap();
         }
-        Some("copy") => {
+        "copy" => {
             let from = args.next().unwrap_or("");
             let to = args.next().unwrap_or("");
 
             std::fs::copy(from, to).unwrap();
         }
-        Some("find") => {
+        "find" => {
             let path = args.next().unwrap_or("");
             let mut paths = std::fs::read_dir(path).unwrap();
 
@@ -119,8 +120,8 @@ pub fn execute_builtin(command: &str, args: &mut dyn Iterator<Item = &str>) {
                 println!("{}", path.path().display());
             }
         }
-        Some("whoami") => println!("{}", std::env::var("USER").unwrap()),
-        Some("list") => {
+        "whoami" => println!("{}", std::env::var("USER").unwrap()),
+        "list" => {
             let path = args.next().unwrap_or(".");
 
             let dir = std::fs::read_dir(path).unwrap();
@@ -132,5 +133,6 @@ pub fn execute_builtin(command: &str, args: &mut dyn Iterator<Item = &str>) {
                 println!("{}", path.display());
             }
         }
+        _ => println!("{}: command not found", command),
     }
 }
