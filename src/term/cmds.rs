@@ -76,7 +76,7 @@ pub fn execute_builtin(command: &str, args: &mut dyn Iterator<Item = &str>) {
             // Reads history File
             let home = std::env::var("HOME").unwrap();
             // Searches for the history file in the home folder
-            let history_file = std::path::Path::new(&home).join(".kosh_history");
+            let history_file = std::path::Path::new(&home).join(".smash_history");
             let history = std::fs::read_to_string(history_file).unwrap();
             println!("{}", history);
         }

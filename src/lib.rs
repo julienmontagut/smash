@@ -1,3 +1,4 @@
+//! smash is a shell written in Rust
 use clap::ArgMatches;
 use std::process::exit;
 use crossterm::event;
@@ -69,7 +70,7 @@ pub fn run_loop(_matches: ArgMatches) -> Result<(), Box<dyn Error>> {
                             stdout().write_all(&output.stdout).unwrap();
                             stderr().write_all(&output.stderr).unwrap();
                         }
-                        Err(err) => println!("kosh: {}", err),
+                        Err(err) => println!("smash: {}", err),
                     }
                 }
                 None => continue,
@@ -109,7 +110,7 @@ fn read_line(input: &mut String) -> Option<Command> {
         writeln!(stderr(), "Error: {}", error).unwrap();
         exit(1);
     }
-    Ok(input)
+    parse_command(input)
 }
 
 fn parse_command(input: &String) -> Option<Command> {

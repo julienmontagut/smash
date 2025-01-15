@@ -1,6 +1,6 @@
-# Kosh
+# Smash
 
-Kosh is an opinionated shell with a focus on simplicity and ease of use.
+Smash is a shell written in Rust with a focus on simplicity and performance.
 
 🚧 This is a work in progress aimed at exercising my rust skills. 🚧
 
