@@ -1,111 +1,107 @@
-use clap::{arg, parser::Values, Command};
+use clap::{arg, Command as ClapCommand};
 use crossterm::{
-    cursor,
-    event::{self, DisableBracketedPaste, DisableFocusChange},
-    execute,
-    terminal::{self, DisableLineWrap},
-    QueueableCommand,
+    cursor, event::{self, DisableBracketedPaste, DisableFocusChange}, execute, terminal::{self, DisableLineWrap}, QueueableCommand
 };
 use std::{
-    io::{stdout, Write},
-    process::exit,
-    simd::LaneCount,
+    error::Error,
+    io::{self, stdout, Write},
 };
-use terminal::event::{Event, KeyCode, KeyEvent, MouseEventKind};
+// use terminal::event::{Event, KeyCode, KeyEvent, MouseEventKind};
 
-//! smash is a shell written in Rust
+mod dirs;
 
 static SMASH_APP_NAME: &str = env!("CARGO_PKG_NAME");
 static SMASH_APP_VERSION: &str = env!("CARGO_PKG_VERSION");
 
-fn main() {
-    let matches = Command::new(SMASH_APP_NAME)
+fn main() -> Result<(), Box<dyn Error>> {
+    // Set up panic handler to ensure terminal is reset on panic
+    std::panic::set_hook(Box::new(|panic_info| {
+        // Clean up terminal on panic
+        let _ = terminal::disable_raw_mode();
+        let mut stdout = stdout();
+        let _ = execute!(
+            stdout,
+            cursor::Show,
+            DisableLineWrap,
+            DisableFocusChange,
+            DisableBracketedPaste
+        );
+        eprintln!("Error: {}", panic_info);
+    }));
+
+    let matches = ClapCommand::new(SMASH_APP_NAME)
         .version(SMASH_APP_VERSION)
         .about(env!("CARGO_PKG_DESCRIPTION"))
-        .author(env!("CARGO_PKG_AUTHORS"))
-        .disable_version_flag(true)
         .args(&[arg!(--posix "Run in a POSIX compatible mode")])
-        .args(&[arg!(-v --version "Prints version information")])
         .get_matches();
-
-    if matches.get_flag("version") {
-        println!("{} {}", SMASH_APP_NAME, SMASH_APP_VERSION);
-        exit(0);
+    
+    // Enable raw mode with better error handling
+    if let Err(e) = terminal::enable_raw_mode() {
+        eprintln!("Failed to set up terminal: {}", e);
+        eprintln!("The shell may not function correctly.");
     }
-
-    terminal::enable_raw_mode().expect("Terminal does not handle raw mode");
 
     let mut output = stdout();
 
-    let u = output
-        .queue(terminal::EnableLineWrap)?
-        .queue(event::EnableFocusChange)?
-        .queue(event::EnableBracketedPaste)?;
+    // Set up terminal with better error handling
+    let terminal_result = || -> Result<(), io::Error> {
+        output.queue(terminal::EnableLineWrap)?;
+        output.queue(event::EnableFocusChange)?;
+        output.queue(event::EnableBracketedPaste)?;
+        output.queue(cursor::Show)?;
+        output.queue(cursor::SetCursorStyle::SteadyBar)?;
+        output.flush()?;
+        Ok(())
+    }();
+    
+    if let Err(e) = terminal_result {
+        eprintln!("Warning: Failed to configure terminal: {}", e);
+    }
 
-    output
-        .queue(cursor::Show)?
-        .queue(cursor::SetCursorStyle::SteadyBar)?
-        .flush()?;
+    // Setup trap for SIGINT to properly handle Ctrl+C
+    #[cfg(unix)]
+    {
+        use std::sync::atomic::{AtomicBool, Ordering};
+        use std::sync::Arc;
+        
+        let running = Arc::new(AtomicBool::new(true));
+        let r = running.clone();
+        
+        if let Err(e) = ctrlc::set_handler(move || {
+            r.store(false, Ordering::SeqCst);
+            // Just print a new line when Ctrl+C is pressed
+            println!();
+        }) {
+            eprintln!("Warning: Could not set Ctrl-C handler: {}", e);
+        }
+    }
 
-    // loop{
-    //     let event = crossterm::event::read()?;
-    //     let mut input = String::new();
-    //     match event {
-    //         Event::FocusGained => execute!(output, cursor::EnableBlinking)?,
-    //         Event::FocusLost => execute!(output, cursor::DisableBlinking)?,
-    //         Event::Key(event) => {
-    //             if !event.modifiers.is_empty() {
-    //                 print!("{:?} ", event.modifiers);
-    //             }
-    //             match event.code {
-    //                 KeyCode::Esc => {
-    //                     break;
-    //                 }
-    //                 KeyCode::Char(char) => {
-    //                     print!("{}", char);
-    //                     input.push(char);
-    //                     output.flush()?;
-    //                 }
-    //                 KeyCode::Enter => {
-    //                     output
-    //                         .queue(cursor::MoveToNextLine(1))?
-    //                         // .queue(cursor::MoveToColumn(0))?
-    //                         .flush()?;
-    //                 }
-    //                 _ => {}
-    //             }
-    //         }
-    //         Event::Mouse(event) => {
-    //             output.queue(cursor::MoveTo(event.column, event.row))?;
-    //             if event.kind == event::MouseEventKind::Up(event::MouseButton::Left) {
-    //                 output.write("Left".as_bytes())?;
-    //             } else if event.kind == event::MouseEventKind::Up(event::MouseButton::Right) {
-    //                 output.write("Right".as_bytes())?;
-    //             }
-    //             output.flush()?
-    //         }
-    //         Event::Paste(data) => println!("{:?}", data),
-    //         Event::Resize(width, height) => println!("New size {}x{}", width, height),
-    //     }
-    // }
+    // Run the shell, then handle cleanup regardless of result
+    let result = smash::run_loop(matches);
 
-    smash::run_loop(matches)?;
-
-    execute!(
+    // Always clean up terminal state regardless of success or error
+    let cleanup_result = execute!(
         output,
         DisableLineWrap,
-        // DisableMouseCapture,
         DisableFocusChange,
         DisableBracketedPaste
-    )?;
+    );
+
+    if let Err(e) = cleanup_result {
+        eprintln!("Warning: Failed to reset terminal state: {}", e);
+    }
 
     if let Ok(true) = terminal::is_raw_mode_enabled() {
-        terminal::disable_raw_mode()?;
-    };
-    ()
+        if let Err(e) = terminal::disable_raw_mode() {
+            eprintln!("Warning: Failed to disable raw mode: {}", e);
+        }
+    }
+
+    // Return the result, or a generic error if there was a panic
+    result
 }
 
-fn posix_mode() -> _ {
+fn posix_mode() -> Result<(), Box<dyn Error>> {
     // Set the terminal to run in posix mode
     todo!()
 }

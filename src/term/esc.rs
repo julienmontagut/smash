@@ -1,7 +1,5 @@
 use std::fmt;
 
-use crossterm::terminal;
-
 pub const ESC_BEGIN: &str = "\x1b[";
 pub const ESC_END: &str = "m";
 
@@ -14,6 +12,7 @@ pub const ESC_VALUE_CURSOR_LEFT: &str = "1D";
 pub const ESC_VALUE_CURSOR_RIGHT: &str = "1C";
 pub const ESC_VALUE_RESET: &str = "0";
 
+#[derive(Copy, Clone)]
 pub enum Color {
     None = 0,
     Black = 30,
@@ -64,7 +63,7 @@ impl fmt::Display for Color {
         let mut output = String::new();
         output.push_str(ESC_BEGIN);
         output.push_str("38;5;");
-        output.push_str(&self.to_string());
+        output.push_str(&(*self as i32).to_string());
         output.push_str(ESC_END);
         write!(f, "{}", output)
     }
