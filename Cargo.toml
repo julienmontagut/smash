@@ -15,7 +15,7 @@ default = ["paste"]
 paste = []
 
 [dependencies]
-clap = "4.5.31"
+clap = "4.5.35"
 classic = { path = "lib/classic" }
 crossterm = { version = "0.28.1", features = ["events"] }
 ctrlc = "3.4.1"
