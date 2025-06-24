@@ -1,7 +1,6 @@
 use crossterm::{
     style::{self, Color, Stylize},
-    terminal,
-    QueueableCommand,
+    terminal, QueueableCommand,
 };
 use std::env;
 use std::io::{self, stdout, Write};
@@ -38,32 +37,32 @@ pub fn print_prompt() -> io::Result<()> {
 
     // Format timestamp
     let timestamp = format_timestamp();
-    
+
     // Get terminal width to ensure prompt fits
     let (width, _) = terminal::size()?;
-    
+
     // Build the prompt parts with colors
     let user_host = format!("{}@{}", username, hostname).with(Color::Blue);
     let path_part = relative_path.clone().with(Color::Magenta);
     let timestamp_part = timestamp.clone().with(Color::DarkGrey);
-    
+
     // Calculate the length of the visible prompt text (without ANSI codes)
     let user_host_len = username.len() + hostname.len() + 1; // +1 for @
     let path_len = relative_path.len();
     // Get git branch length from git_part
     let git_part_len = git_part.len();
     let timestamp_len = timestamp.len();
-    
+
     // If the prompt would be too long, show a more compact version
     let mut output = stdout();
-    
+
     if user_host_len + path_len + git_part_len + timestamp_len + 4 > width as usize {
         // Compact prompt
         let dir_name = current_dir
             .file_name()
             .map(|n| n.to_string_lossy().to_string())
             .unwrap_or_else(|| "?".to_string());
-            
+
         output
             .queue(style::PrintStyledContent(user_host))?
             .queue(style::Print(":"))?
@@ -81,7 +80,7 @@ pub fn print_prompt() -> io::Result<()> {
             .queue(style::Print(git_part))?
             .queue(style::Print(" $ "))?;
     }
-    
+
     output.flush()?;
     Ok(())
 }
@@ -99,29 +98,29 @@ fn get_current_dir_string() -> io::Result<String> {
 
 fn get_git_branch() -> io::Result<String> {
     use std::process::Command;
-    
+
     let output = Command::new("git")
         .args(["branch", "--show-current"])
         .output();
-        
+
     match output {
         Ok(output) if output.status.success() => {
             let branch = String::from_utf8_lossy(&output.stdout).trim().to_string();
             Ok(branch)
-        },
+        }
         _ => Ok(String::new()),
     }
 }
 
 fn format_timestamp() -> String {
     use std::time::{SystemTime, UNIX_EPOCH};
-    
+
     if let Ok(time) = SystemTime::now().duration_since(UNIX_EPOCH) {
         let secs = time.as_secs();
         let hours = (secs / 3600) % 24;
         let minutes = (secs / 60) % 60;
         let seconds = secs % 60;
-        
+
         format!("{:02}:{:02}:{:02}", hours, minutes, seconds)
     } else {
         String::from("--:--:--")

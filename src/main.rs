@@ -1,6 +1,10 @@
 use clap::{arg, Command as ClapCommand};
 use crossterm::{
-    cursor, event::{self, DisableBracketedPaste, DisableFocusChange}, execute, terminal::{self, DisableLineWrap}, QueueableCommand
+    cursor,
+    event::{self, DisableBracketedPaste, DisableFocusChange},
+    execute,
+    terminal::{self, DisableLineWrap},
+    QueueableCommand,
 };
 use std::{
     error::Error,
@@ -34,7 +38,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         .about(env!("CARGO_PKG_DESCRIPTION"))
         .args(&[arg!(--posix "Run in a POSIX compatible mode")])
         .get_matches();
-    
+
     // Enable raw mode with better error handling
     if let Err(e) = terminal::enable_raw_mode() {
         eprintln!("Failed to set up terminal: {}", e);
@@ -53,7 +57,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         output.flush()?;
         Ok(())
     }();
-    
+
     if let Err(e) = terminal_result {
         eprintln!("Warning: Failed to configure terminal: {}", e);
     }
@@ -63,10 +67,10 @@ fn main() -> Result<(), Box<dyn Error>> {
     {
         use std::sync::atomic::{AtomicBool, Ordering};
         use std::sync::Arc;
-        
+
         let running = Arc::new(AtomicBool::new(true));
         let r = running.clone();
-        
+
         if let Err(e) = ctrlc::set_handler(move || {
             r.store(false, Ordering::SeqCst);
             // Just print a new line when Ctrl+C is pressed

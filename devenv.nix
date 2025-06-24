@@ -1,13 +1,14 @@
 { pkgs, lib, config, inputs, ... }:
 
 {
+  dotenv.enable = true;
   # https://devenv.sh/basics/
   # env.GREET = "devenv";
 
   # https://devenv.sh/packages/
-  packages = [
-  pkgs.git
-  pkgs.lldb
+  packages = with pkgs; [
+    git
+    lldb
    ];
 
   # https://devenv.sh/languages/
@@ -45,4 +46,8 @@
   # pre-commit.hooks.shellcheck.enable = true;
 
   # See full reference at https://devenv.sh/reference/options/
+  devcontainer = {
+    enable = true;
+    settings = { updateContentCommand = true; };
+  };
 }
